@@ -11,7 +11,7 @@
       when: options.proxmox_secrets is defined
 
     - name: "Create molecule instance(s)."
-      community.general.proxmox_kvm:
+      community.proxmox.proxmox_kvm:
         state: present
         api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
         api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
@@ -34,7 +34,7 @@
       register: proxmox_clone
 
     - name: "Update molecule instance config(s)"
-      community.general.proxmox_kvm:
+      community.proxmox.proxmox_kvm:
         state: present
         update: true
         api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
