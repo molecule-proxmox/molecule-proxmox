@@ -27,7 +27,7 @@
       when: not instance_config_stat.stat.exists
 
     - name: "Remove molecule instance(s)."
-      community.general.proxmox_kvm:
+      community.proxmox.proxmox_kvm:
         api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
         api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
         api_user: "{{ api_user | d(options.api_user) | d(omit) }}"

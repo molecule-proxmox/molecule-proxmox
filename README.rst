@@ -12,12 +12,12 @@ Requirements
 * Access to a `Proxmox VE`_ cluster
 * One or more virtual machine templates with required setup
 * Python package `proxmoxer`_
-* Ansible module `community.general.proxmox_kvm`_
+* Ansible module `community.proxmox.proxmox_kvm`_
 
 The required Python packages are automatically installed when
 ``molecule-proxmox`` is installed with ``pip``.
 
-The ``proxmox_kvm`` module is included with the Community.General collection
+The ``proxmox_kvm`` module is included with the Community.Proxmox collection
 and is automatically installed when Ansible is installed with ``pip``.
 
 
@@ -247,5 +247,5 @@ The `MIT`_ License.
 
 .. _`Proxmox VE`: https://www.proxmox.com/en/proxmox-ve
 .. _`proxmoxer`: https://pypi.org/project/proxmoxer/
-.. _`community.general.proxmox_kvm`: https://docs.ansible.com/ansible/latest/collections/community/general/proxmox_kvm_module.html
+.. _`community.proxmox.proxmox_kvm`: https://docs.ansible.com/ansible/latest/collections/community/proxmox/proxmox_kvm_module.html
 .. _`MIT`: https://github.com/meffie/molecule-proxmox/blob/master/LICENSE
