@@ -195,6 +195,7 @@ def run_module():
             api_password=dict(type='str', no_log=True),
             api_token_id=dict(type='str', no_log=True),
             api_token_secret=dict(type='str', no_log=True),
+            api_timeout=dict(type='int', default=5),
             validate_certs=dict(type='bool', default=False),
             vmid=dict(type='int', required=True),
             timeout=dict(type='int', default=300),
@@ -209,6 +210,7 @@ def run_module():
     api_password = module.params['api_password']
     api_token_id = module.params['api_token_id']
     api_token_secret = module.params['api_token_secret']
+    api_timeout = module.params['api_timeout']
     vmid = module.params['vmid']
 
     auth_args = {'user': api_user}
@@ -223,6 +225,7 @@ def run_module():
         api_host,
         port=api_port,
         verify_ssl=validate_certs,
+        timeout=api_timeout,
         **auth_args)
 
     # Lookup the vm by id.
