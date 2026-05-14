@@ -90,6 +90,7 @@ Examples
         # Optional: Use an API token for Proxmox authentication.
         api_token_id: "********"
         api_token_secret: "*******************************"
+        api_timeout: 10
         node: pve01
         ssh_user: tester
         ssh_port: 22022             # default to 22
