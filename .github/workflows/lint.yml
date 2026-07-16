@@ -10,6 +10,7 @@ on:
       - '**.py'
       - '**.yml'
       - '.github/workflows/lint.yml'
+      - 'requirements.txt'
       - 'requirements_lint.txt'
       - '.pylintrc'
       - '.yamllint'
@@ -19,9 +20,11 @@ on:
       - '**.py'
       - '**.yml'
       - '.github/workflows/lint.yml'
+      - 'requirements.txt'
       - 'requirements_lint.txt'
       - '.pylintrc'
       - '.yamllint'
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -55,7 +58,6 @@ jobs:
         run: |
           yamllint --version
           yamllint .
-
 
       - name: Running Ansible-Lint
         run: |
