@@ -21,8 +21,9 @@ def chdir(path):
 
 def molecule(command, *args):
     args = ['molecule', command] + list(args)
-    proc = subprocess.Popen(args)
-    rc = proc.wait()
+    with subprocess.Popen(args) as proc:
+        rc = proc.wait()
+
     assert rc == 0
 
 

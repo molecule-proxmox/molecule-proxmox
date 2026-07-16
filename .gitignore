@@ -3,7 +3,6 @@
 *.pyd
 *.egg-info/
 __pycache__/
-.*
 dist/
 build/
-!.ansible-lint
+/venv/

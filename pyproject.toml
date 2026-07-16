@@ -1,3 +1,42 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "niceshops-molecule-docker"
+authors = [
+    {name = "Pascal Rath", email = "rene.rath+moleculepve@niceshops.com"},
+]
+description = "Proxmox Molecule-Driver Plugin :: Molecule testing on Proxmox-VE"
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["ansible", "ansible-molecule", "ansible-molecule-driver", "ansible-testing"]
+license = {file = "LICENSE"}
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'License :: OSI Approved :: MIT License',
+    'Framework :: Molecule',
+    'Framework :: Ansible',
+]
+dynamic = ["dependencies", "version"]
+
+[project.urls]
+Homepage = "https://github.com/niceshops/ansible-molecule-proxmox"
+Documentation = "https://github.com/niceshops/ansible-molecule-proxmox"
+Repository = "https://github.com/niceshops/ansible-molecule-proxmox.git"
+Issues = "https://github.com/niceshops/ansible-molecule-proxmox/issues"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+version = {file = ["VERSION"]}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["molecule_proxmox*"]
+exclude = ["*_pytest.py"]
+
+[tool.setuptools.package-data]
+"*" = ["*.yml", "*.json", "*.rst"]
+
+[project.entry-points."molecule.driver"]
+proxmox = "molecule_proxmox.driver:Proxmox"

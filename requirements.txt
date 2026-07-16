@@ -1,8 +1,4 @@
-# Requirements for development.
-ansible
-pyflakes
-pylint
-yamllint
-pytest
-collective.checkdocs
-twine
+molecule
+proxmoxer>=1.3.1
+PyYAML
+requests

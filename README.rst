@@ -6,6 +6,11 @@ This is an Ansible Molecule Driver plugin to manage instances on a
 `Proxmox VE`_ hypervisor cluster.  Only virtual machines are supported at this
 time.
 
+Fork
+====
+
+This is a fork or the [molecule-proxmox](http://pypi.org/project/molecule-proxmox) to make it work with the currently supported [community.proxmox](https://docs.ansible.com/projects/ansible/latest/collections/community/proxmox/index.html) Ansible-collection.
+
 Requirements
 ============
 

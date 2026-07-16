@@ -1,0 +1,63 @@
+---
+
+name: Lint
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [latest]
+    paths:
+      - '**.py'
+      - '**.yml'
+      - '.github/workflows/lint.yml'
+      - 'requirements_lint.txt'
+      - '.pylintrc'
+      - '.yamllint'
+  pull_request:
+    branches: [latest]
+    paths:
+      - '**.py'
+      - '**.yml'
+      - '.github/workflows/lint.yml'
+      - 'requirements_lint.txt'
+      - '.pylintrc'
+      - '.yamllint'
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements_lint.txt >/dev/null
+          pip install -r requirements.txt >/dev/null
+
+      - name: Running PyLint
+        run: |
+          pylint --version
+          pylint --rcfile .pylintrc --recursive=y .
+
+      - name: Running Yaml-Lint
+        run: |
+          yamllint --version
+          yamllint .
+
+
+      - name: Running Ansible-Lint
+        run: |
+          ansible-lint --version
+          ANSIBLE_LIBRARY=src/molecule_proxmox/modules ansible-lint -c .ansible-lint.yml

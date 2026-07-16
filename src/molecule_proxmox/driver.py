@@ -20,43 +20,32 @@
 
 import os
 
-from molecule import logger
-from molecule import util
+from molecule import logger, util
 from molecule.api import Driver
-
 
 LOG = logger.get_logger(__name__)
 
 
 class Proxmox(Driver):
-    """
-    The class responsible for managing instances with Proxmox.
-
-    .. code-block:: yaml
-
-        driver:
-          name: proxmox
-        platforms:
-          - name: instance
-            template: generic-centos-8
-            memory: 1024
-            cpus: 1
-
-    .. code-block:: bash
-
-        $ pip install molecule-proxmox
-
-    """  # noqa
-
     def __init__(self, config=None):
-        super(Proxmox, self).__init__(config)
+        super().__init__(config)
         self._name = "molecule-proxmox"
-        library_path = os.environ.get("ANSIBLE_LIBRARY", "")
-        if library_path:
-            library_path = self.modules_dir() + ":" + library_path
+        # We removed the global os.environ manipulation from here.
+
+    @property
+    def env(self):
+        """Environment variables for the driver."""
+        env_dict = os.environ.copy()
+        library_path = self.modules_dir()
+
+        # Merge our custom modules path with any existing ANSIBLE_LIBRARY paths
+        existing_library = env_dict.get("ANSIBLE_LIBRARY", "")
+        if existing_library:
+            env_dict["ANSIBLE_LIBRARY"] = f"{library_path}:{existing_library}"
         else:
-            library_path = self.modules_dir()
-        os.environ["ANSIBLE_LIBRARY"] = library_path
+            env_dict["ANSIBLE_LIBRARY"] = library_path
+
+        return env_dict
 
     @property
     def name(self):
@@ -69,13 +58,7 @@ class Proxmox(Driver):
     @property
     def login_cmd_template(self):
         connection_options = " ".join(self.ssh_connection_options)
-        return (
-            "ssh {{address}} "
-            "-l {{user}} "
-            "-p {{port}} "
-            "-i {{identity_file}} "
-            "{}"
-        ).format(connection_options)
+        return f"ssh {{address}} -l {{user}} -p {{port}} -i {{identity_file}} {connection_options}"
 
     @property
     def default_safe_files(self):
@@ -86,40 +69,30 @@ class Proxmox(Driver):
         return self._get_ssh_connection_options()
 
     def login_options(self, instance_name):
-        d = {"instance": instance_name}
-        return util.merge_dicts(d, self._get_instance_config(instance_name))
+        return util.merge_dicts({"instance": instance_name}, self._get_instance_config(instance_name))
 
     def ansible_connection_options(self, instance_name):
         try:
-            d = self._get_instance_config(instance_name)
+            config_dict = self._get_instance_config(instance_name)
             return {
-                "ansible_user": d["user"],
-                "ansible_host": d["address"],
-                "ansible_port": d["port"],
-                "ansible_private_key_file": d["identity_file"],
+                "ansible_user": config_dict["user"],
+                "ansible_host": config_dict["address"],
+                "ansible_port": config_dict["port"],
+                "ansible_private_key_file": config_dict["identity_file"],
                 "connection": "ssh",
-                "ansible_ssh_common_args": " ".join(self.ssh_connection_options),  # noqa: E501
+                "ansible_ssh_common_args": " ".join(self.ssh_connection_options),
             }
-        except StopIteration:
-            return {}
-        except IOError:
-            # Instance has yet to be provisioned, therefore the
-            # instance_config is not on disk.
+        except (StopIteration, IOError):
             return {}
 
     def _get_instance_config(self, instance_name):
-        instance_config_dict = util.safe_load_file(self._config.driver.instance_config)  # noqa: E501
-        return next(
-            item for item in instance_config_dict if item["instance"] == instance_name   # noqa: E501
-        )
+        instance_config_dict = util.safe_load_file(self._config.driver.instance_config)
+        return next(item for item in instance_config_dict if item["instance"] == instance_name)
 
     def sanity_checks(self):
         pass
 
     def template_dir(self):
-        """Return path to its own cookiecutterm templates. It is used by init
-        command in order to figure out where to load the templates from.
-        """
         return os.path.join(os.path.dirname(__file__), "cookiecutter")
 
     def modules_dir(self):

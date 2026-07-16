@@ -1,31 +1,33 @@
 ---
+
 - name: Prepare
   hosts: all
-  gather_facts: no
+  gather_facts: false
+
   tasks:
-    - name: "Waiting for instance ssh connection."
+    - name: Waiting for instance ssh connection
       ansible.builtin.wait_for_connection:
 
-    - name: "Set host name."
-      when: molecule_yml.driver.options.sethostname | d('yes') | bool
+    - name: Set host name
+      when: molecule_yml.driver.options.sethostname | d(true) | bool
       block:
-        - name: "Set instance hostname."
-          become: yes
+        - name: Set instance hostname
+          become: true
           ansible.builtin.hostname:
             name: "{{ inventory_hostname }}"
 
-        - name: "Gather facts."
+        - name: Gather facts
           ansible.builtin.setup:
 
-        - name: "Remove workaround loopback from /etc/hosts file."
-          become: yes
+        - name: Remove workaround loopback from /etc/hosts file
+          become: true
           ansible.builtin.lineinfile:
             state: absent
             path: /etc/hosts
             regex: '^127\.0\.1\.1\s+\S+'
 
-        - name: "Add address and hostname to /etc/hosts file."
-          become: yes
+        - name: Add address and hostname to /etc/hosts file
+          become: true
           ansible.builtin.lineinfile:
             state: present
             path: /etc/hosts
