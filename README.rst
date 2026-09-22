@@ -9,15 +9,37 @@ time.
 Requirements
 ============
 
+* Molecule
+* Ansible (``ansible`` or ``ansible-core`` packages)
+* Ansible ``community.proxmox`` collection
+* Python package `proxmoxer`_
 * Access to a `Proxmox VE`_ cluster
 * One or more virtual machine templates with required setup
-* Python package `proxmoxer`_
-* Ansible module `community.proxmox.proxmox_kvm`_
 
 The required Python packages are automatically installed when
 ``molecule-proxmox`` is installed with ``pip``.
 
-The ``proxmox_kvm`` module is included in the ``community.proxmox`` collection.
+The `community.proxmox`_ collection is bundled with the ``ansible`` package,
+but not with ``ansible-core`` package. The ``community.proxmox`` collection can
+be installed with::
+
+    ansible-galaxy collection install community.proxmox
+
+Alternately, you can have Molecule install it for you automatically by adding
+a Galaxy dependency to your scenario's ``molecule.yml``, along with a
+``collections.yml`` file next to it:
+
+.. code-block:: yaml
+
+   # molecule.yml
+   dependency:
+     name: galaxy
+
+.. code-block:: yaml
+
+   # collections.yml
+   collections:
+     - name: community.proxmox
 
 Virtual machine template requirements
 -------------------------------------
@@ -200,7 +222,7 @@ To checkout the source code:
 
 .. code-block:: bash
 
-    git clone https://github.com/meffie/molecule-proxmox
+    git clone https://github.com/molecule-proxmox/molecule-proxmox
     cd molecule-proxmox
 
 Install `tox` with `pipx`, your system package manager, or create
@@ -214,7 +236,7 @@ Copy the `envrc.sample` file to `.envrc` and edit the `.envrc` for your local
 proxmox site. Source the `.envrc` file to to export the environment variables
 to the current shell.
 
-To run the tests with the latest supported molucule version:
+To run the tests with the latest supported molecule version:
 
 .. code-block:: bash
 
@@ -246,5 +268,5 @@ The `MIT`_ License.
 
 .. _`Proxmox VE`: https://www.proxmox.com/en/proxmox-ve
 .. _`proxmoxer`: https://pypi.org/project/proxmoxer/
-.. _`community.proxmox.proxmox_kvm`: https://docs.ansible.com/projects/ansible/latest/collections/community/proxmox/proxmox_module.html
+.. _`community.proxmox`: https://docs.ansible.com/projects/ansible/latest/collections/community/proxmox/
 .. _`MIT`: https://github.com/molecule-proxmox/molecule-proxmox/blob/master/LICENSE
