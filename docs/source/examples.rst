@@ -69,7 +69,7 @@ Examples
      - name: test02
 
 The ``proxmox_secrets`` setting specifies the path to an external file with
-settings for the proxmox API connection, such as api_password. If this is a regular
+settings for the Proxmox API connection, such as api_password. If this is a regular
 file, it should be a yaml file with the settings to be included. If the file is
 an executable, the file will be run and the stdout will be combined with the
 driver options. The output of the script needs to be valid yaml
@@ -132,7 +132,7 @@ Finally, a configuration example with many features enabled:
      - name: test01
        newid: 1000
        template_name: debian11
-       # See proxmox_kvm module documentation for for cloud-init options.
+       # See proxmox_kvm module documentation for cloud-init options.
        ciuser: some_user
        cipassword: some_password
        ipconfig:

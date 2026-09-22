@@ -12,7 +12,7 @@ The required Python packages are automatically installed when
 ``molecule-proxmox`` is installed with ``pip``.
 
 The `community.proxmox`_ collection is bundled with the ``ansible`` package,
-but not with ``ansible-core`` package. The ``community.proxmox`` collection can
+but not with the ``ansible-core`` package. The ``community.proxmox`` collection can
 be installed with::
 
     ansible-galaxy collection install community.proxmox
