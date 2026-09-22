@@ -124,3 +124,6 @@ class Proxmox(Driver):
 
     def modules_dir(self):
         return os.path.join(os.path.dirname(__file__), "modules")
+
+    def schema_file(self):
+        return os.path.join(os.path.dirname(__file__), "driver.json")

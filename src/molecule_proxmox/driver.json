@@ -1,0 +1,198 @@
+{
+  "$defs": {
+    "MoleculeDriverModel": {
+      "properties": {
+        "name": {
+          "enum": ["molecule-proxmox"],
+          "title": "Name",
+          "type": "string"
+        },
+        "options": {
+          "$ref": "#/$defs/MoleculeDriverOptionsModel"
+        },
+        "safe_files": {
+          "items": {
+            "type": "string"
+          },
+          "title": "SafeFiles",
+          "type": "array"
+        },
+        "ssh_connection_options": {
+          "items": {
+            "type": "string"
+          },
+          "title": "SshConnectionOptions",
+          "type": "array"
+        }
+      },
+      "required": ["name"],
+      "title": "MoleculeDriverModel",
+      "type": "object"
+    },
+    "MoleculeDriverOptionsModel": {
+      "additionalProperties": true,
+      "properties": {
+        "api_host": {
+          "title": "Proxmox API host",
+          "type": ["string", "null"]
+        },
+        "api_port": {
+          "title": "Proxmox API port",
+          "type": ["integer", "string", "null"]
+        },
+        "api_user": {
+          "title": "Proxmox API user",
+          "type": ["string", "null"]
+        },
+        "api_password": {
+          "title": "Proxmox API password",
+          "type": ["string", "null"]
+        },
+        "api_token_id": {
+          "title": "Proxmox API token id",
+          "type": ["string", "null"]
+        },
+        "api_token_secret": {
+          "title": "Proxmox API token secret",
+          "type": ["string", "null"]
+        },
+        "api_timeout": {
+          "title": "Proxmox API request timeout, in seconds",
+          "type": ["integer", "string", "null"]
+        },
+        "validate_certs": {
+          "title": "Validate the Proxmox API TLS certificate",
+          "type": ["boolean", "string", "null"]
+        },
+        "node": {
+          "title": "Proxmox node name",
+          "type": ["string", "null"]
+        },
+        "ssh_user": {
+          "title": "SSH user for connecting to created instances",
+          "type": ["string", "null"]
+        },
+        "ssh_port": {
+          "title": "SSH port for connecting to created instances",
+          "type": ["integer", "string", "null"]
+        },
+        "ssh_identity_file": {
+          "title": "SSH private key file for connecting to created instances",
+          "type": ["string", "null"]
+        },
+        "template_name": {
+          "title": "Default Proxmox template name to clone",
+          "type": ["string", "null"]
+        },
+        "full": {
+          "title": "Create a full clone instead of a linked clone",
+          "type": ["boolean", "string", "null"]
+        },
+        "timeout": {
+          "title": "Timeout, in seconds, to wait for instance creation and boot",
+          "type": ["integer", "string", "null"]
+        },
+        "pool": {
+          "title": "Proxmox resource pool to add created instances to",
+          "type": ["string", "null"]
+        },
+        "sethostname": {
+          "title": "Set the hostname on the instance after cloning",
+          "type": ["boolean", "string", "null"]
+        },
+        "debug": {
+          "title": "Enable logging of proxmox_secrets tasks for troubleshooting",
+          "type": ["boolean", "string", "null"]
+        },
+        "proxmox_secrets": {
+          "title": "Path to a file or executable providing Proxmox connection secrets",
+          "type": ["string", "null"]
+        }
+      },
+      "title": "MoleculeDriverOptionsModel",
+      "type": "object"
+    },
+    "MoleculePlatformModel": {
+      "additionalProperties": true,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "template_name": {
+          "title": "Proxmox template name to clone for this instance",
+          "type": ["string", "null"]
+        },
+        "proxmox_template_name": {
+          "title": "Proxmox template name to clone for this instance",
+          "type": ["string", "null"]
+        },
+        "proxmox_template_vmid": {
+          "title": "Proxmox template vmid to clone for this instance",
+          "type": ["integer", "string", "null"]
+        },
+        "template_vmid": {
+          "title": "Proxmox template vmid to clone for this instance",
+          "type": ["integer", "string", "null"]
+        },
+        "newid": {
+          "title": "vmid to assign to the cloned instance",
+          "type": ["integer", "string", "null"]
+        },
+        "box": {
+          "title": "Box",
+          "type": ["string", "null"]
+        },
+        "ciuser": {
+          "title": "cloud-init user",
+          "type": ["string", "null"]
+        },
+        "cipassword": {
+          "title": "cloud-init password",
+          "type": ["string", "null"]
+        },
+        "citype": {
+          "title": "cloud-init config type",
+          "type": ["string", "null"]
+        },
+        "ipconfig": {
+          "title": "cloud-init network configuration",
+          "type": ["object", "null"]
+        },
+        "nameservers": {
+          "title": "cloud-init nameservers",
+          "type": ["array", "null"]
+        },
+        "searchdomains": {
+          "title": "cloud-init search domains",
+          "type": ["array", "null"]
+        },
+        "sshkeys": {
+          "title": "cloud-init ssh public keys",
+          "type": ["array", "string", "null"]
+        }
+      },
+      "required": ["name"],
+      "title": "MoleculePlatformModel",
+      "type": "object"
+    }
+  },
+  "$id": "https://raw.githubusercontent.com/molecule-proxmox/molecule-proxmox/main/src/molecule_proxmox/driver.json",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "examples": ["molecule/*/molecule.yml"],
+  "properties": {
+    "driver": {
+      "$ref": "#/$defs/MoleculeDriverModel"
+    },
+    "platforms": {
+      "items": {
+        "$ref": "#/$defs/MoleculePlatformModel"
+      },
+      "title": "Platforms",
+      "type": "array"
+    }
+  },
+  "required": ["driver"],
+  "title": "Molecule Proxmox Driver Schema",
+  "type": "object"
+}
