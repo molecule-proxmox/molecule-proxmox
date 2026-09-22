@@ -34,6 +34,7 @@
         api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
         api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
         api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+        api_timeout: "{{ options.api_timeout | d(omit) }}"
         state: absent
         vmid: "{{ i.vmid }}"
         validate_certs: "{{ options.validate_certs | d(true) }}"
