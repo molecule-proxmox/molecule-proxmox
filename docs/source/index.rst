@@ -12,6 +12,7 @@ time.
 
    requirements
    install
+   options
    examples
    development
    authors

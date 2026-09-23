@@ -1,6 +1,12 @@
 Examples
 ========
 
+These examples show common ``molecule.yml`` configurations. See
+:doc:`options` for the full option reference.
+
+A minimal configuration, authenticating with a Proxmox user and password,
+cloning a different template for each instance:
+
 .. code-block:: yaml
 
    driver:
@@ -18,6 +24,9 @@ Examples
        template_name: debian11
      - name: test02
        template_name: alma8
+
+A more complete configuration, authenticating with an API token instead of
+a password, and setting several optional driver options:
 
 .. code-block:: yaml
 
@@ -52,6 +61,10 @@ Examples
      - name: test02
        # Optional: Specify the VM id of the clone.
        newid: 217
+
+Rather than storing credentials directly in ``molecule.yml``,
+``proxmox_secrets`` can point to an external file or script that supplies
+them:
 
 .. code-block:: yaml
 
@@ -115,7 +128,8 @@ Or with a file (which **must** not be executable):
     api_user: my-proxmox-user@pam
     api_password: my-secret-password
 
-Finally, a configuration example with many features enabled:
+Finally, an example that uses cloud-init settings to configure the cloned
+instance's user account and networking:
 
 .. code-block:: yaml
 
