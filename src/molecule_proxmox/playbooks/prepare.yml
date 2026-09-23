@@ -26,7 +26,10 @@
 
         - name: "Add address and hostname to /etc/hosts file."
           become: yes
+          vars:
+            ipv4: "{{ ansible_facts['default_ipv4']['address'] }}"
+            hostname: "{{ ansible_facts['hostname'] }}"
           ansible.builtin.lineinfile:
             state: present
             path: /etc/hosts
-            line: "{{ ansible_default_ipv4.address }} {{ ansible_hostname }}"
+            line: "{{ ipv4 }} {{ hostname }}"
