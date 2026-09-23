@@ -1,3 +1,52 @@
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "molecule-proxmox"
+dynamic = ["version"]
+description = "Proxmox Molecule Plugin :: run molecule tests using proxmox"
+readme = {file = "README.rst", content-type = "text/x-rst"}
+authors = [
+    {name = "Michael Meffie", email = "mmeffie@sinenomine.net"},
+]
+license = "MIT"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    # molecule plugins are not allowed to mention Ansible as a direct dependency
+    "molecule>=25.12.0",
+    "PyYAML",
+    "proxmoxer>=1.3.1",
+    "requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/molecule-proxmox/molecule-proxmox"
+
+[project.entry-points."molecule.driver"]
+proxmox = "molecule_proxmox.driver:Proxmox"
+
+[tool.setuptools]
+packages = [
+    "molecule_proxmox",
+    "molecule_proxmox.cookiecutter",
+    "molecule_proxmox.modules",
+    "molecule_proxmox.playbooks",
+    "molecule_proxmox.playbooks.common",
+]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.dynamic]
+version = {attr = "molecule_proxmox.__version__"}
