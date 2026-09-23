@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='molecule-proxmox',
-    version='1.1.0',
+    version='1.2.1',
     author='Michael Meffie',
     author_email='mmeffie@sinenomine.net',
     description='Proxmox Molecule Plugin :: run molecule tests using proxmox',
