@@ -4,5 +4,4 @@ pyflakes
 pylint
 yamllint
 pytest
-collective.checkdocs
 twine
