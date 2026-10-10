@@ -25,6 +25,26 @@ cloning a different template for each instance:
      - name: test02
        template_name: alma8
 
+In a cluster with several nodes, each instance may be created on a
+different node. Each node used needs its own copy of the template:
+
+.. code-block:: yaml
+
+   driver:
+     name: molecule-proxmox
+     options:
+        api_host: <hostname>        # e.g. pve01.example.com
+        api_user: <name>@<realm>    # e.g. root@pam
+        api_password: "********"
+        node: pve01                 # default node
+        ssh_user: tester
+        ssh_identity_file: /path/to/id_rsa
+        template_name: debian11
+   platforms:
+     - name: test01                 # created on pve01
+     - name: test02
+       proxmox_node: pve02
+
 A more complete configuration, authenticating with an API token instead of
 a password, and setting several optional driver options:
 

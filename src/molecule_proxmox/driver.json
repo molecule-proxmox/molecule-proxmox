@@ -135,6 +135,14 @@
           "title": "Proxmox template vmid to clone for this instance",
           "type": ["integer", "string", "null"]
         },
+        "proxmox_node": {
+          "title": "Proxmox node name to create this instance on",
+          "type": ["string", "null"]
+        },
+        "node": {
+          "title": "Proxmox node name to create this instance on",
+          "type": ["string", "null"]
+        },
         "newid": {
           "title": "vmid to assign to the cloned instance",
           "type": ["integer", "string", "null"]

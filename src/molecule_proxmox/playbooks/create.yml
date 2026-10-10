@@ -25,7 +25,7 @@
         api_timeout: "{{ options.api_timeout | d(omit) }}"
         validate_certs: "{{ options.validate_certs | d(true) }}"
         type: qemu
-        node: "{{ options.node }}"
+        node: "{{ p.proxmox_node | d(p.node, true) | d(options.node, true) }}"
         name: "{{ p.proxmox_template_name | d(p.template_name, true) | d(options.template_name, true) | d(p.box, true) | d('molecule', true) }}"
       when: not (p.proxmox_template_vmid | d(p.template_vmid, true) | d(false, true))
       loop: "{{ molecule_yml.platforms }}"
@@ -40,10 +40,11 @@
         fail_msg: "{{ not_found if t.proxmox_vms | length == 0 else not_unique }}"
         quiet: true
       vars:
+        node: "{{ t.p.proxmox_node | d(t.p.node, true) | d(options.node, true) }}"
         template: "{{ t.p.proxmox_template_name | d(t.p.template_name, true) | d(options.template_name, true) | d(t.p.box, true) | d('molecule', true) }}"
-        not_found: "Template '{{ template }}' not found on node '{{ options.node }}'."
+        not_found: "Template '{{ template }}' not found on node '{{ node }}'."
         not_unique: >-
-          More than one template '{{ template }}' found on node '{{ options.node }}';
+          More than one template '{{ template }}' found on node '{{ node }}';
           please specify the template by vmid instead.
       when: t is not skipped
       loop: "{{ template_info.results }}"
@@ -77,7 +78,7 @@
         clone: "{{ template_vmids[p.name] | string }}"
         name: "{{ p.name }}"
         validate_certs: "{{ options.validate_certs | d(true) }}"
-        node: "{{ options.node }}"
+        node: "{{ p.proxmox_node | d(p.node, true) | d(options.node, true) }}"
         full: "{{ options.full | d(omit) }}"
         timeout: "{{ options.timeout | d(omit) }}"
         pool: "{{ options.pool | d(omit) }}"
@@ -101,7 +102,7 @@
         api_timeout: "{{ options.api_timeout | d(omit) }}"
         validate_certs: false
         vmid: "{{ rc.vmid }}"
-        node: "{{ options.node }}"
+        node: "{{ rc.p.proxmox_node | d(rc.p.node, true) | d(options.node, true) }}"
         timeout: "{{ options.timeout | d(omit) }}"
         ciuser: "{{ rc.p.ciuser | d(omit, true) }}"
         cipassword: "{{ rc.p.cipassword | d(omit, true) }}"

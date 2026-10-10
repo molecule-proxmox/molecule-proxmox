@@ -35,7 +35,8 @@ Connection options
   defaults to ``true``. Set to ``false`` for a self-signed certificate.
 
 ``node``
-  Proxmox node name to create instances on. Required.
+  Default Proxmox node name to create instances on, for instances that do
+  not set their own ``node``. Required.
 
 Instance options
 ------------------
@@ -107,6 +108,12 @@ alongside each instance's ``name``.
 ``template_vmid`` / ``proxmox_template_vmid``
   Clone this instance from a template identified by vmid instead of name.
   ``proxmox_template_vmid`` takes precedence if both are set.
+
+``node`` / ``proxmox_node``
+  Proxmox node name to create this instance on. ``proxmox_node`` takes
+  precedence if both are set. Falls back to the driver-level ``node``
+  option. When the template is given by name, a template with that name
+  must exist on this node.
 
 ``newid``
   vmid to assign to the cloned instance. Optional; Proxmox assigns the
