@@ -100,7 +100,9 @@ alongside each instance's ``name``.
   Proxmox template to clone for this instance. ``proxmox_template_name``
   takes precedence if both are set. Falls back to the driver-level
   ``template_name`` option, then to ``box``, then to the literal
-  ``molecule`` if none are set.
+  ``molecule`` if none are set. The template is looked up by name on the
+  node the instance is created on, so each node may have its own local
+  copy of a template with the same name.
 
 ``template_vmid`` / ``proxmox_template_vmid``
   Clone this instance from a template identified by vmid instead of name.

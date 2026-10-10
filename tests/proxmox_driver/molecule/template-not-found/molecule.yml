@@ -1,0 +1,23 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: molecule-proxmox
+  options:
+    api_host: "${TEST_PROXMOX_HOST}"
+    api_user: "${TEST_PROXMOX_USER}"
+    api_password: "${TEST_PROXMOX_PASSWORD}"
+    validate_certs: "${TEST_PROXMOX_VALIDATE_CERTS:-true}"
+    node: "${TEST_PROXMOX_NODE}"
+    ssh_user: "${TEST_PROXMOX_SSH_USER}"
+    ssh_identity_file: "${TEST_PROXMOX_SSH_IDENTITY_FILE}"
+    timeout: 120
+    debug: "${TEST_PROXMOX_DEBUG}"
+
+platforms:
+  # Template name which does not exist; create is expected to fail.
+  - name: m01
+    template_name: molecule-test-no-such-template
+
+provisioner:
+  name: ansible

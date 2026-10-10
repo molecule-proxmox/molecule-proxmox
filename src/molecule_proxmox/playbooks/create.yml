@@ -10,6 +10,58 @@
       ansible.builtin.include_tasks: common/secrets.yml
       when: options.proxmox_secrets is defined
 
+    # Resolve template names to vmids on the instance's node, since each
+    # node may have its own local copy of a template with the same name.
+    # The proxmox_kvm module searches the whole cluster by name and fails
+    # when a name is not unique.
+    - name: "Look up template vmid(s)."
+      community.proxmox.proxmox_vm_info:
+        api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
+        api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
+        api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
+        api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
+        api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
+        api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+        api_timeout: "{{ options.api_timeout | d(omit) }}"
+        validate_certs: "{{ options.validate_certs | d(true) }}"
+        type: qemu
+        node: "{{ options.node }}"
+        name: "{{ p.proxmox_template_name | d(p.template_name, true) | d(options.template_name, true) | d(p.box, true) | d('molecule', true) }}"
+      when: not (p.proxmox_template_vmid | d(p.template_vmid, true) | d(false, true))
+      loop: "{{ molecule_yml.platforms }}"
+      loop_control:
+        loop_var: p
+        label: "{{ p.name }}"
+      register: template_info
+
+    - name: "Verify template(s) found."
+      ansible.builtin.assert:
+        that: t.proxmox_vms | length == 1
+        fail_msg: "{{ not_found if t.proxmox_vms | length == 0 else not_unique }}"
+        quiet: true
+      vars:
+        template: "{{ t.p.proxmox_template_name | d(t.p.template_name, true) | d(options.template_name, true) | d(t.p.box, true) | d('molecule', true) }}"
+        not_found: "Template '{{ template }}' not found on node '{{ options.node }}'."
+        not_unique: >-
+          More than one template '{{ template }}' found on node '{{ options.node }}';
+          please specify the template by vmid instead.
+      when: t is not skipped
+      loop: "{{ template_info.results }}"
+      loop_control:
+        loop_var: t
+        label: "{{ t.p.name }}"
+
+    - name: "Set template vmid fact."
+      ansible.builtin.set_fact:
+        template_vmids: >-
+          {{ template_vmids | d({}) | combine({t.p.name: (
+               t.proxmox_vms[0].vmid if t is not skipped
+               else t.p.proxmox_template_vmid | d(t.p.template_vmid, true))}) }}
+      loop: "{{ template_info.results }}"
+      loop_control:
+        loop_var: t
+        label: "{{ t.p.name }}"
+
     - name: "Create molecule instance(s)."
       community.proxmox.proxmox_kvm:
         state: present
@@ -20,8 +72,9 @@
         api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
         api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
         api_timeout: "{{ options.api_timeout | d(omit) }}"
-        vmid: "{{ p.proxmox_template_vmid | d(p.template_vmid, true) | d(omit, true) }}"
-        clone: "{{ p.proxmox_template_name | d(p.template_name, true) | d(options.template_name, true) | d(p.box, true) | d('molecule', true) }}"
+        vmid: "{{ template_vmids[p.name] }}"
+        # The clone value is unused when vmid is set, but is required to clone.
+        clone: "{{ template_vmids[p.name] | string }}"
         name: "{{ p.name }}"
         validate_certs: "{{ options.validate_certs | d(true) }}"
         node: "{{ options.node }}"

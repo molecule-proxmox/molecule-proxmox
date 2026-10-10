@@ -36,3 +36,23 @@ def test_molecule_test(scenario):
     with chdir(projectdir):
         molecule('test', '--scenario-name', scenario)
         molecule('reset')
+
+
+def test_template_not_found():
+    print('')
+    scenario = 'template-not-found'
+    testdir = pathlib.Path(__file__).resolve().parent
+    projectdir = testdir / 'proxmox_driver'
+    with chdir(projectdir):
+        try:
+            args = ['molecule', 'create', '--scenario-name', scenario]
+            proc = subprocess.run(args, capture_output=True, text=True)
+            print(proc.stdout)
+            print(proc.stderr)
+            assert proc.returncode != 0
+            expected = ("Template 'molecule-test-no-such-template' "
+                        "not found on node")
+            assert expected in proc.stdout + proc.stderr
+        finally:
+            molecule('destroy', '--scenario-name', scenario)
+            molecule('reset')
