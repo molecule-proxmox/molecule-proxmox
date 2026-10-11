@@ -1,6 +1,7 @@
 Requirements
 ============
 
+* Python 3.11 or later
 * Molecule 25.12 or later
 * Ansible
 * Ansible ``community.proxmox`` collection
