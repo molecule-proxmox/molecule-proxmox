@@ -23,7 +23,9 @@ How it works
   host name of the instance to the instance name.
 
 ``molecule destroy``
-  Stops and removes the instances created by the driver.
+  Stops and removes the instances created by the driver. In snapshot
+  mode, the instances are kept and rolled back to a snapshot instead, so
+  the next create is fast.
 
 Features
 --------
@@ -37,6 +39,9 @@ Features
   from a file or a script instead of storing them in ``molecule.yml``.
 * Use existing machines as *unmanaged* instances, alongside the cloned
   instances.
+* Keep the instances between test runs, and reset them to a snapshot on
+  destroy, instead of cloning them again for every run. See
+  :doc:`snapshots`.
 
 See :doc:`requirements` to get started.
 

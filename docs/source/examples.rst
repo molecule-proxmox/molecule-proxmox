@@ -69,6 +69,27 @@ they may be mixed with cloned instances:
        ssh_user: admin
        ssh_identity_file: /path/to/admin_id_rsa
 
+To keep the instances between test runs, and reset them to a snapshot on
+destroy instead of removing them, set the ``snapshot`` option. See
+:doc:`snapshots` for details, and for how to remove the kept instances:
+
+.. code-block:: yaml
+
+   driver:
+     name: molecule-proxmox
+     options:
+        api_host: <hostname>        # e.g. pve01.example.com
+        api_user: <name>@<realm>    # e.g. root@pam
+        api_password: "********"
+        node: pve01
+        ssh_user: tester
+        ssh_identity_file: /path/to/id_rsa
+        template_name: debian11
+        # Set MOLECULE_PROXMOX_SNAPSHOT=false to remove the kept instances.
+        snapshot: "${MOLECULE_PROXMOX_SNAPSHOT:-true}"
+   platforms:
+     - name: test01
+
 A more complete configuration, authenticating with an API token instead of
 a password, and setting several optional driver options:
 

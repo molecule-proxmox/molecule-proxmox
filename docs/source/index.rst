@@ -15,6 +15,7 @@ time.
    install
    options
    examples
+   snapshots
    development
    authors
    license

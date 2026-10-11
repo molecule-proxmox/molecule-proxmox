@@ -82,29 +82,8 @@ Instance options
 ``snapshot``
   Keep the instances, and reset them to a snapshot on destroy, instead of
   removing them, so the next create is fast. Optional; defaults to
-  ``false``. The first create clones each instance and takes a snapshot
-  before the first boot. Destroy stops the instances and rolls them back
-  to the snapshot. The next create finds the kept instances, rolls them
-  back again (in case the previous run was interrupted), and starts them.
-
-  The vmids of the kept instances are saved in the molecule ephemeral
-  directory, so the kept instances are separate for each user, project,
-  and scenario. A saved vmid is used only when the VM still exists with
-  the instance name.
-
-  To remove the kept instances, run destroy with ``snapshot`` set to
-  ``false``, for example with
-  ``snapshot: "${MOLECULE_PROXMOX_SNAPSHOT:-true}"`` in ``molecule.yml``
-  and ``MOLECULE_PROXMOX_SNAPSHOT=false molecule destroy``. Remove the kept
-  instances after updating a template, so the next create clones the new
-  template.
-
-  .. note::
-
-     ``molecule reset`` removes the ephemeral directory, and with it the
-     saved vmids. Remove the kept instances before running
-     ``molecule reset``; otherwise, the kept instances must be removed
-     manually.
+  ``false``. To remove the kept instances, run destroy with ``snapshot``
+  set to ``false``. See :doc:`snapshots`.
 
 ``snapshot_name``
   Name of the snapshot taken in ``snapshot`` mode. Optional; defaults to
