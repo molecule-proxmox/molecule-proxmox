@@ -5,6 +5,10 @@
   gather_facts: false
   vars:
       options: "{{ molecule_yml.driver.options }}"
+      # Instances with an address are unmanaged; the user provides an
+      # existing machine, so it is not cloned, started, or destroyed.
+      unmanaged_platforms: "{{ molecule_yml.platforms | selectattr('address', 'defined') | selectattr('address') | list }}"
+      managed_platforms: "{{ molecule_yml.platforms | rejectattr('name', 'in', unmanaged_platforms | map(attribute='name')) | list }}"
   tasks:
     - name: "Load proxmox connection secrets."
       ansible.builtin.include_tasks: common/secrets.yml
@@ -28,7 +32,7 @@
         node: "{{ p.proxmox_node | d(p.node, true) | d(options.node, true) }}"
         name: "{{ p.proxmox_template_name | d(p.template_name, true) | d(options.template_name, true) | d(p.box, true) | d('molecule', true) }}"
       when: not (p.proxmox_template_vmid | d(p.template_vmid, true) | d(false, true))
-      loop: "{{ molecule_yml.platforms }}"
+      loop: "{{ managed_platforms }}"
       loop_control:
         loop_var: p
         label: "{{ p.name }}"
@@ -83,7 +87,7 @@
         timeout: "{{ options.timeout | d(omit) }}"
         pool: "{{ options.pool | d(omit) }}"
         newid: "{{ p.newid | d(p.newid, true) | d(omit, true) }}"
-      loop: "{{ molecule_yml.platforms }}"
+      loop: "{{ managed_platforms }}"
       loop_control:
         loop_var: p
         label: "{{ p.name }}"
@@ -147,9 +151,9 @@
         instance_config:
           instance: "{{ ra.rc.p.name }}"
           address: "{{ ra.addresses[0] }}"
-          user: "{{ options.ssh_user | d('molecule') }}"
-          port: "{{ options.ssh_port | d(22) }}"
-          identity_file: "{{ options.ssh_identity_file }}"
+          user: "{{ ra.rc.p.ssh_user | d(options.ssh_user, true) | d('molecule', true) }}"
+          port: "{{ ra.rc.p.ssh_port | d(options.ssh_port, true) | d(22, true) }}"
+          identity_file: "{{ ra.rc.p.ssh_identity_file | d(options.ssh_identity_file, true) }}"
           vmid: "{{ ra.vmid }}"
           validate_certs: "{{ options.validate_certs | d(true) }}"
       loop: "{{ proxmox_qemu_agent.results }}"
@@ -158,9 +162,25 @@
         label: "{{ ra.rc.p.name, ra.vmid, ra.addresses[0] }}"
       register: instance_configs
 
+    - name: "Populate unmanaged instance configs."
+      ansible.builtin.set_fact:
+        instance_config:
+          instance: "{{ p.name }}"
+          address: "{{ p.address }}"
+          user: "{{ p.ssh_user | d(options.ssh_user, true) | d('molecule', true) }}"
+          port: "{{ p.ssh_port | d(options.ssh_port, true) | d(22, true) }}"
+          identity_file: "{{ p.ssh_identity_file | d(options.ssh_identity_file, true) }}"
+      loop: "{{ unmanaged_platforms }}"
+      loop_control:
+        loop_var: p
+        label: "{{ p.name, p.address }}"
+      register: unmanaged_instance_configs
+
     - name: "Set instance_config fact."
       ansible.builtin.set_fact:
-        instance_configs: "{{ instance_configs.results | map(attribute='ansible_facts.instance_config') | list }}"
+        instance_configs: >-
+          {{ (instance_configs.results + unmanaged_instance_configs.results)
+             | map(attribute='ansible_facts.instance_config') | list }}
 
     - name: "Write instance configs."
       ansible.builtin.copy:

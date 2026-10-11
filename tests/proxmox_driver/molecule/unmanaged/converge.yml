@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Example
+      command: uname -a
+      changed_when: false
+      register: uname_results
+
+    - debug:
+        var: uname_results.stdout

@@ -38,6 +38,17 @@ def test_molecule_test(scenario):
         molecule('reset')
 
 
+@pytest.mark.skipif(not os.environ.get('TEST_PROXMOX_UNMANAGED_ADDRESS'),
+                    reason='TEST_PROXMOX_UNMANAGED_ADDRESS is not set')
+def test_unmanaged():
+    print('')
+    testdir = pathlib.Path(__file__).resolve().parent
+    projectdir = testdir / 'proxmox_driver'
+    with chdir(projectdir):
+        molecule('test', '--scenario-name', 'unmanaged')
+        molecule('reset')
+
+
 def test_template_not_found():
     print('')
     scenario = 'template-not-found'

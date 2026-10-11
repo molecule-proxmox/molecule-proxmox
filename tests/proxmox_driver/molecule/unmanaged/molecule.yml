@@ -1,0 +1,33 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: molecule-proxmox
+  options:
+    api_host: "${TEST_PROXMOX_HOST}"
+    api_port: ${TEST_PROXMOX_PORT}
+    api_user: "${TEST_PROXMOX_USER}"
+    api_password: "${TEST_PROXMOX_PASSWORD}"
+    validate_certs: "${TEST_PROXMOX_VALIDATE_CERTS:-true}"
+    node: "${TEST_PROXMOX_NODE}"
+    ssh_user: "${TEST_PROXMOX_SSH_USER}"
+    ssh_identity_file: "${TEST_PROXMOX_SSH_IDENTITY_FILE}"
+    template_name: "${TEST_PROXMOX_TEMPLATE_NAME}"
+    full: "${TEST_PROXMOX_FULL_CLONE:-true}"
+    debug: "${TEST_PROXMOX_DEBUG}"
+
+platforms:
+  # Cloned instance.
+  - name: m01
+
+  # Existing machine; not created or destroyed by the driver. The ssh
+  # settings fall back to the driver options when not set.
+  - name: u01
+    address: "${TEST_PROXMOX_UNMANAGED_ADDRESS}"
+    ssh_user: "${TEST_PROXMOX_UNMANAGED_SSH_USER}"
+    ssh_port: "${TEST_PROXMOX_UNMANAGED_SSH_PORT}"
+    ssh_identity_file: "${TEST_PROXMOX_UNMANAGED_SSH_IDENTITY_FILE}"
+
+provisioner:
+  name: ansible

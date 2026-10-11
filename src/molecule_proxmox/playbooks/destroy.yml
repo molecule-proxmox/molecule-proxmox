@@ -41,7 +41,8 @@
         node: "{{ options.node }}"
         force: yes
         timeout: "{{ options.timeout | d(omit) }}"
-      loop: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
+      # Unmanaged instances have no vmid and are never removed.
+      loop: "{{ lookup('file', molecule_instance_config) | from_yaml | selectattr('vmid', 'defined') | list }}"
       loop_control:
         loop_var: i
         label: "{{ i.instance, i.vmid }}"

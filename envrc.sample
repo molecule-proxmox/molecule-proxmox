@@ -22,3 +22,9 @@ export TEST_PROXMOX_CLOUDINIT=
 export TEST_PROXMOX_DEBUG="false"
 export TEST_PROXMOX_FULL_CLONE="false"
 export TEST_PROXMOX_NAMESERVER=
+# Optional: An existing machine for the unmanaged instance test. The
+# test is skipped when the address is not set.
+export TEST_PROXMOX_UNMANAGED_ADDRESS=
+export TEST_PROXMOX_UNMANAGED_SSH_USER=
+export TEST_PROXMOX_UNMANAGED_SSH_PORT=
+export TEST_PROXMOX_UNMANAGED_SSH_IDENTITY_FILE=

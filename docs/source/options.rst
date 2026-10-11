@@ -42,16 +42,16 @@ Instance options
 ------------------
 
 ``ssh_user``
-  SSH user for connecting to created instances. Optional; defaults to
-  ``molecule``.
+  SSH user for connecting to instances. Optional; defaults to
+  ``molecule``. May be overridden per instance.
 
 ``ssh_port``
-  SSH port for connecting to created instances. Optional; defaults to
-  ``22``.
+  SSH port for connecting to instances. Optional; defaults to ``22``. May
+  be overridden per instance.
 
 ``ssh_identity_file``
-  Path to the SSH private key file for connecting to created instances.
-  Required.
+  Path to the SSH private key file for connecting to instances. Required,
+  unless set for every instance.
 
 ``template_name``
   Default Proxmox template to clone when a platform does not specify its
@@ -123,6 +123,19 @@ alongside each instance's ``name``.
   Alternate fallback for the template name, for compatibility with
   ``molecule.yml`` files migrated from other drivers. Lowest precedence in
   the template-selection chain; see ``template_name`` above.
+
+``address``
+  Address (IP address or host name) of an existing machine to use for
+  this instance. An instance with an address is *unmanaged*: the driver
+  does not clone, start, or destroy it, and does not change its host name
+  in ``prepare``. The machine must be running and reachable with SSH.
+  The Proxmox template and node options do not apply to unmanaged
+  instances.
+
+``ssh_user``, ``ssh_port``, ``ssh_identity_file``
+  SSH settings for connecting to this instance. Each falls back to the
+  driver-level option of the same name. Useful for unmanaged instances
+  which have a different login than the cloned instances.
 
 ``ciuser``, ``cipassword``, ``citype``, ``ipconfig``, ``nameservers``, ``searchdomains``, ``sshkeys``
   cloud-init settings, applied only if the cloned template has a

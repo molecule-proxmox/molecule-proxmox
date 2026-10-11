@@ -143,6 +143,22 @@
           "title": "Proxmox node name to create this instance on",
           "type": ["string", "null"]
         },
+        "address": {
+          "title": "Address of an existing, unmanaged instance",
+          "type": ["string", "null"]
+        },
+        "ssh_user": {
+          "title": "SSH user for connecting to this instance",
+          "type": ["string", "null"]
+        },
+        "ssh_port": {
+          "title": "SSH port for connecting to this instance",
+          "type": ["integer", "string", "null"]
+        },
+        "ssh_identity_file": {
+          "title": "SSH private key file for connecting to this instance",
+          "type": ["string", "null"]
+        },
         "newid": {
           "title": "vmid to assign to the cloned instance",
           "type": ["integer", "string", "null"]

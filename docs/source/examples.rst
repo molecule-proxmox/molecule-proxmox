@@ -45,6 +45,30 @@ different node. Each node used needs its own copy of the template:
      - name: test02
        proxmox_node: pve02
 
+An existing machine may be used as an *unmanaged* instance by giving its
+address. The driver does not create or destroy unmanaged instances, and
+they may be mixed with cloned instances:
+
+.. code-block:: yaml
+
+   driver:
+     name: molecule-proxmox
+     options:
+        api_host: <hostname>        # e.g. pve01.example.com
+        api_user: <name>@<realm>    # e.g. root@pam
+        api_password: "********"
+        node: pve01
+        ssh_user: tester
+        ssh_identity_file: /path/to/id_rsa
+        template_name: debian11
+   platforms:
+     - name: test01                 # cloned from debian11
+     - name: legacy01               # existing machine
+       address: 192.168.0.42
+       # Optional: Login for this instance, if different.
+       ssh_user: admin
+       ssh_identity_file: /path/to/admin_id_rsa
+
 A more complete configuration, authenticating with an API token instead of
 a password, and setting several optional driver options:
 

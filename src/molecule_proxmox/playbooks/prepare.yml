@@ -6,8 +6,12 @@
     - name: "Waiting for instance ssh connection."
       ansible.builtin.wait_for_connection:
 
+    # Do not change the host name of unmanaged instances (instances with
+    # an address), since the user manages those machines.
     - name: "Set host name."
-      when: molecule_yml.driver.options.sethostname | d('yes') | bool
+      when:
+        - molecule_yml.driver.options.sethostname | d('yes') | bool
+        - molecule_yml.platforms | selectattr('name', '==', inventory_hostname) | selectattr('address', 'defined') | selectattr('address') | list | length == 0
       block:
         - name: "Set instance hostname."
           become: yes
