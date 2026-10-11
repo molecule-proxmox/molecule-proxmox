@@ -1,0 +1,25 @@
+# Fake Proxmox virtual machine for the molecule-proxmox quick tests.
+#
+# The fake Proxmox API server starts a container from this image for each
+# fake virtual machine. SSH connections are made by running sshd in inetd
+# mode with 'podman exec', so no network ports are published.
+FROM docker.io/library/debian:trixie-slim
+
+LABEL org.opencontainers.image.title="molecule-proxmox-fake-vm" \
+      org.opencontainers.image.description="Fake Proxmox virtual machine for molecule-proxmox testing"
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        openssh-server python3 sudo iproute2 && \
+    rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /run/sshd && \
+    ssh-keygen -A
+
+RUN useradd --create-home --shell /bin/bash molecule && \
+    echo 'molecule ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/molecule && \
+    chmod 0440 /etc/sudoers.d/molecule && \
+    install -d -m 0700 -o molecule -g molecule /home/molecule/.ssh
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod 0755 /entrypoint.sh
+CMD ["/entrypoint.sh"]

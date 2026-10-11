@@ -36,3 +36,41 @@ To run tests with other versions:
 .. code-block:: bash
 
     tox -e <testenv> -- [<pytest_options>]
+
+Testing without a Proxmox cluster
+---------------------------------
+
+The tests can be run with a fake Proxmox server instead of a real Proxmox
+cluster, with the ``--fake`` pytest option. This requires ``podman``, but
+no ``.envrc`` settings:
+
+.. code-block:: bash
+
+    tox -e latest -- --fake
+
+The fake Proxmox API server runs in the pytest process, with an in-memory
+cluster of two nodes, each with a local copy of a template with the same
+name. The fake virtual machines are ``podman`` containers, built from
+``tests/fake/Containerfile``, so the complete ``molecule test`` sequence is
+run, including ``prepare`` and ``converge``. The ``--fake`` option may be
+used with any of the tox test environments, to test the driver with all of
+the supported Ansible and Molecule versions:
+
+.. code-block:: bash
+
+    tox -- --fake
+
+.. note::
+
+   Do not run the tox test environments in parallel (``tox p``) with the
+   ``--fake`` option. Each test environment starts its own fake Proxmox
+   server, and the fake virtual machines of the test environments would
+   have the same addresses and container names. For the same reason, the
+   tests can not be run in parallel with ``pytest-xdist``.
+
+The fake Proxmox server implements only the part of the Proxmox API used
+by the driver, so the tests should still be run with a real Proxmox
+cluster before a release.
+
+The unmanaged instance test is skipped with a real Proxmox cluster, unless
+``TEST_PROXMOX_UNMANAGED_ADDRESS`` is set in the ``.envrc`` file.
