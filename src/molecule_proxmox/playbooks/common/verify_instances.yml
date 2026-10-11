@@ -1,0 +1,36 @@
+---
+# Verify the instances still exist. An instance is verified only when the
+# VM with the vmid still exists with the instance name, so a VM which was
+# removed outside of molecule, and its vmid reused, is never touched.
+# Input: verify_vmids, a dict of instance name to vmid.
+# Sets verified_vmids, a dict of the verified instance names to vmids.
+- name: "Initialize verified vmid fact."
+  ansible.builtin.set_fact:
+    verified_vmids: {}
+
+- name: "Look up instance(s)."
+  community.proxmox.proxmox_vm_info:
+    api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
+    api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
+    api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
+    api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
+    api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
+    api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+    api_timeout: "{{ options.api_timeout | d(omit) }}"
+    validate_certs: "{{ options.validate_certs | d(true) }}"
+    type: qemu
+    vmid: "{{ vi.value }}"
+  loop: "{{ verify_vmids | dict2items }}"
+  loop_control:
+    loop_var: vi
+    label: "{{ vi.key, vi.value }}"
+  register: verify_info
+
+- name: "Set verified vmid fact."
+  ansible.builtin.set_fact:
+    verified_vmids: "{{ verified_vmids | combine({v.vi.key: v.vi.value | int}) }}"
+  when: v.proxmox_vms | selectattr('name', '==', v.vi.key) | list | length == 1
+  loop: "{{ verify_info.results }}"
+  loop_control:
+    loop_var: v
+    label: "{{ v.vi.key, v.vi.value }}"

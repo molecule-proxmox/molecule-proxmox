@@ -26,6 +26,13 @@
         mode: '0644'
       when: not instance_config_stat.stat.exists
 
+    # Unmanaged instances have no vmid and are never removed.
+    - name: "Verify molecule instance(s)."
+      ansible.builtin.include_tasks: common/verify_instances.yml
+      vars:
+        instance_configs: "{{ lookup('file', molecule_instance_config) | from_yaml | selectattr('vmid', 'defined') | list }}"
+        verify_vmids: "{{ dict(instance_configs | map(attribute='instance') | zip(instance_configs | map(attribute='vmid'))) }}"
+
     - name: "Remove molecule instance(s)."
       community.proxmox.proxmox_kvm:
         api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
@@ -36,13 +43,12 @@
         api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
         api_timeout: "{{ options.api_timeout | d(omit) }}"
         state: absent
-        vmid: "{{ i.vmid }}"
+        vmid: "{{ iv.value }}"
         validate_certs: "{{ options.validate_certs | d(true) }}"
         node: "{{ options.node }}"
         force: yes
         timeout: "{{ options.timeout | d(omit) }}"
-      # Unmanaged instances have no vmid and are never removed.
-      loop: "{{ lookup('file', molecule_instance_config) | from_yaml | selectattr('vmid', 'defined') | list }}"
+      loop: "{{ verified_vmids | dict2items }}"
       loop_control:
-        loop_var: i
-        label: "{{ i.instance, i.vmid }}"
+        loop_var: iv
+        label: "{{ iv.key, iv.value }}"
