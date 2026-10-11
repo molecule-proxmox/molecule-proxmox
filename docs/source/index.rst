@@ -10,6 +10,7 @@ time.
    :maxdepth: 1
    :caption: Contents:
 
+   introduction
    requirements
    install
    options
