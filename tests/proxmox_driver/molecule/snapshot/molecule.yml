@@ -1,0 +1,27 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: molecule-proxmox
+  options:
+    api_host: "${TEST_PROXMOX_HOST}"
+    api_port: ${TEST_PROXMOX_PORT}
+    api_user: "${TEST_PROXMOX_USER}"
+    api_password: "${TEST_PROXMOX_PASSWORD}"
+    validate_certs: "${TEST_PROXMOX_VALIDATE_CERTS:-true}"
+    node: "${TEST_PROXMOX_NODE}"
+    ssh_user: "${TEST_PROXMOX_SSH_USER}"
+    ssh_identity_file: "${TEST_PROXMOX_SSH_IDENTITY_FILE}"
+    template_name: "${TEST_PROXMOX_TEMPLATE_NAME}"
+    full: "${TEST_PROXMOX_FULL_CLONE:-true}"
+    debug: "${TEST_PROXMOX_DEBUG}"
+    # Keep the instances and reset them to a snapshot on destroy. Set
+    # MOLECULE_PROXMOX_SNAPSHOT=false to remove the instances on destroy.
+    snapshot: "${MOLECULE_PROXMOX_SNAPSHOT:-true}"
+
+platforms:
+  - name: m01
+
+provisioner:
+  name: ansible

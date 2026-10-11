@@ -1,0 +1,23 @@
+---
+# Load the snapshot state, kept in the molecule ephemeral directory. The
+# state has the vmids of the kept instances. A kept instance is used only
+# when the VM still exists with the instance name.
+# Sets snapshot_vmids, a dict of instance name to vmid.
+- name: "Check for snapshot state."
+  ansible.builtin.stat:
+    path: "{{ snapshot_state_file }}"
+  register: snapshot_state_stat
+
+- name: "Load snapshot state."
+  ansible.builtin.set_fact:
+    snapshot_state: "{{ lookup('file', snapshot_state_file) | from_yaml }}"
+  when: snapshot_state_stat.stat.exists
+
+- name: "Verify snapshot instance(s)."
+  ansible.builtin.include_tasks: verify_instances.yml
+  vars:
+    verify_vmids: "{{ snapshot_state.instances | d({}) if snapshot_state is defined else {} }}"
+
+- name: "Set snapshot instance vmid fact."
+  ansible.builtin.set_fact:
+    snapshot_vmids: "{{ verified_vmids }}"

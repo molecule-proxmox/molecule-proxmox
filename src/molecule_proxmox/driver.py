@@ -79,7 +79,12 @@ class Proxmox(Driver):
 
     @property
     def default_safe_files(self):
-        return []
+        # Keep the snapshot state when molecule prunes the ephemeral
+        # directory after destroy.
+        return [
+            os.path.join(self._config.scenario.ephemeral_directory,
+                         "proxmox_snapshot.yml"),
+        ]
 
     @property
     def default_ssh_connection_options(self):

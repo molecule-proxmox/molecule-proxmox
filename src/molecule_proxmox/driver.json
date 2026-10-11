@@ -100,6 +100,14 @@
           "title": "Set the hostname on the instance after cloning",
           "type": ["boolean", "string", "null"]
         },
+        "snapshot": {
+          "title": "Keep instances and reset them to a snapshot on destroy",
+          "type": ["boolean", "string", "null"]
+        },
+        "snapshot_name": {
+          "title": "Name of the snapshot to reset instances to",
+          "type": ["string", "null"]
+        },
         "debug": {
           "title": "Enable logging of proxmox_secrets tasks for troubleshooting",
           "type": ["boolean", "string", "null"]

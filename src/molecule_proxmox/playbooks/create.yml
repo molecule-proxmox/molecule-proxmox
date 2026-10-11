@@ -9,10 +9,67 @@
       # existing machine, so it is not cloned, started, or destroyed.
       unmanaged_platforms: "{{ molecule_yml.platforms | selectattr('address', 'defined') | selectattr('address') | list }}"
       managed_platforms: "{{ molecule_yml.platforms | rejectattr('name', 'in', unmanaged_platforms | map(attribute='name')) | list }}"
+      # In snapshot mode, instances are kept and reset to a snapshot on
+      # destroy, instead of being removed, so the next create is fast.
+      snapshot_enabled: "{{ options.snapshot | d(false) | bool }}"
+      snapshot_name: "{{ options.snapshot_name | d('molecule', true) }}"
+      # The snapshot state is kept in the molecule ephemeral directory, so
+      # the kept instances are separate for each user, project, and scenario.
+      snapshot_state_file: "{{ molecule_ephemeral_directory }}/proxmox_snapshot.yml"
+      # Managed instances which need to be cloned.
+      new_platforms: "{{ managed_platforms | rejectattr('name', 'in', snapshot_vmids | d({})) | list }}"
   tasks:
     - name: "Load proxmox connection secrets."
       ansible.builtin.include_tasks: common/secrets.yml
       when: options.proxmox_secrets is defined
+
+    - name: "Initialize snapshot instance vmid fact."
+      ansible.builtin.set_fact:
+        snapshot_vmids: {}
+
+    - name: "Find snapshot instance(s)."
+      ansible.builtin.include_tasks: common/snapshot_instances.yml
+      when: snapshot_enabled
+
+    # Stop and reset the kept instances, in case the previous run did
+    # not complete a destroy.
+    - name: "Stop snapshot instance(s)."
+      community.proxmox.proxmox_kvm:
+        state: stopped
+        force: true
+        api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
+        api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
+        api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
+        api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
+        api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
+        api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+        api_timeout: "{{ options.api_timeout | d(omit) }}"
+        validate_certs: "{{ options.validate_certs | d(true) }}"
+        vmid: "{{ sv.value }}"
+        timeout: "{{ options.timeout | d(omit) }}"
+      loop: "{{ snapshot_vmids | dict2items }}"
+      loop_control:
+        loop_var: sv
+        label: "{{ sv.key, sv.value }}"
+
+    - name: "Reset snapshot instance(s)."
+      community.proxmox.proxmox_snap:
+        state: rollback
+        api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
+        api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
+        api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
+        api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
+        api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
+        api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+        api_timeout: "{{ options.api_timeout | d(omit) }}"
+        validate_certs: "{{ options.validate_certs | d(true) }}"
+        vmid: "{{ sv.value }}"
+        snapname: "{{ snapshot_name }}"
+        timeout: "{{ options.timeout | d(omit) }}"
+      loop: "{{ snapshot_vmids | dict2items }}"
+      loop_control:
+        loop_var: sv
+        label: "{{ sv.key, sv.value }}"
 
     # Resolve template names to vmids on the instance's node, since each
     # node may have its own local copy of a template with the same name.
@@ -32,7 +89,7 @@
         node: "{{ p.proxmox_node | d(p.node, true) | d(options.node, true) }}"
         name: "{{ p.proxmox_template_name | d(p.template_name, true) | d(options.template_name, true) | d(p.box, true) | d('molecule', true) }}"
       when: not (p.proxmox_template_vmid | d(p.template_vmid, true) | d(false, true))
-      loop: "{{ managed_platforms }}"
+      loop: "{{ new_platforms }}"
       loop_control:
         loop_var: p
         label: "{{ p.name }}"
@@ -87,7 +144,7 @@
         timeout: "{{ options.timeout | d(omit) }}"
         pool: "{{ options.pool | d(omit) }}"
         newid: "{{ p.newid | d(p.newid, true) | d(omit, true) }}"
-      loop: "{{ managed_platforms }}"
+      loop: "{{ new_platforms }}"
       loop_control:
         loop_var: p
         label: "{{ p.name }}"
@@ -128,6 +185,42 @@
         loop_var: rc
         label: "{{ rc.p.name, rc.vmid }}"
 
+    # Take the snapshot before the first boot, so every create starts
+    # from the same state.
+    - name: "Snapshot instance(s)."
+      community.proxmox.proxmox_snap:
+        state: present
+        api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
+        api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
+        api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
+        api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
+        api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
+        api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+        api_timeout: "{{ options.api_timeout | d(omit) }}"
+        validate_certs: "{{ options.validate_certs | d(true) }}"
+        vmid: "{{ rc.vmid }}"
+        snapname: "{{ snapshot_name }}"
+        description: "Created by molecule-proxmox"
+        timeout: "{{ options.timeout | d(omit) }}"
+      when: snapshot_enabled
+      loop: "{{ proxmox_clone.results }}"
+      loop_control:
+        loop_var: rc
+        label: "{{ rc.p.name, rc.vmid }}"
+
+    - name: "Set instance vmid fact."
+      ansible.builtin.set_fact:
+        instance_vmids: >-
+          {{ snapshot_vmids | combine(dict(proxmox_clone.results
+             | map(attribute='p.name') | zip(proxmox_clone.results | map(attribute='vmid')))) }}
+
+    - name: "Write snapshot state."
+      ansible.builtin.copy:
+        content: "{{ {'instances': snapshot_vmids | combine(instance_vmids)} | to_nice_yaml }}"
+        dest: "{{ snapshot_state_file }}"
+        mode: '0644'
+      when: snapshot_enabled
+
     - name: "Start molecule instance(s)."
       proxmox_qemu_agent:
         api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
@@ -137,29 +230,29 @@
         api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
         api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
         api_timeout: "{{ options.api_timeout | d(omit) }}"
-        vmid: "{{ rc.vmid }}"
+        vmid: "{{ instance_vmids[p.name] }}"
         timeout: "{{ options.timeout | d(omit) }}"
         validate_certs: "{{ options.validate_certs | d(true) }}"
-      loop: "{{ proxmox_clone.results }}"
+      loop: "{{ managed_platforms }}"
       loop_control:
-        loop_var: rc
-        label: "{{ rc.p.name, rc.vmid }}"
+        loop_var: p
+        label: "{{ p.name, instance_vmids[p.name] }}"
       register: proxmox_qemu_agent
 
     - name: "Populate instance configs."
       ansible.builtin.set_fact:
         instance_config:
-          instance: "{{ ra.rc.p.name }}"
+          instance: "{{ ra.p.name }}"
           address: "{{ ra.addresses[0] }}"
-          user: "{{ ra.rc.p.ssh_user | d(options.ssh_user, true) | d('molecule', true) }}"
-          port: "{{ ra.rc.p.ssh_port | d(options.ssh_port, true) | d(22, true) }}"
-          identity_file: "{{ ra.rc.p.ssh_identity_file | d(options.ssh_identity_file, true) }}"
+          user: "{{ ra.p.ssh_user | d(options.ssh_user, true) | d('molecule', true) }}"
+          port: "{{ ra.p.ssh_port | d(options.ssh_port, true) | d(22, true) }}"
+          identity_file: "{{ ra.p.ssh_identity_file | d(options.ssh_identity_file, true) }}"
           vmid: "{{ ra.vmid }}"
           validate_certs: "{{ options.validate_certs | d(true) }}"
       loop: "{{ proxmox_qemu_agent.results }}"
       loop_control:
         loop_var: ra
-        label: "{{ ra.rc.p.name, ra.vmid, ra.addresses[0] }}"
+        label: "{{ ra.p.name, ra.vmid, ra.addresses[0] }}"
       register: instance_configs
 
     - name: "Populate unmanaged instance configs."

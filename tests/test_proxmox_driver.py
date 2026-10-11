@@ -7,6 +7,7 @@ import os
 import pathlib
 import subprocess
 import pytest
+import yaml
 
 
 @contextlib.contextmanager
@@ -47,6 +48,39 @@ def test_unmanaged():
     with chdir(projectdir):
         molecule('test', '--scenario-name', 'unmanaged')
         molecule('reset')
+
+
+def instance_vmids(ephemeral_directory):
+    path = ephemeral_directory / 'instance_config.yml'
+    with open(path) as f:
+        instance_config = yaml.safe_load(f)
+    return {i['instance']: int(i['vmid']) for i in instance_config}
+
+
+def test_snapshot(tmp_path, monkeypatch):
+    print('')
+    scenario = 'snapshot'
+    testdir = pathlib.Path(__file__).resolve().parent
+    projectdir = testdir / 'proxmox_driver'
+    # Use a known ephemeral directory to read the instance config.
+    monkeypatch.setenv('MOLECULE_EPHEMERAL_DIRECTORY', str(tmp_path))
+    with chdir(projectdir):
+        try:
+            # The first create clones and snapshots the instance.
+            molecule('create', '--scenario-name', scenario)
+            first = instance_vmids(tmp_path)
+            # Destroy resets the instance to the snapshot, and the next
+            # create uses the same instance.
+            molecule('destroy', '--scenario-name', scenario)
+            molecule('create', '--scenario-name', scenario)
+            second = instance_vmids(tmp_path)
+            assert second == first
+            molecule('converge', '--scenario-name', scenario)
+        finally:
+            # Remove the instance.
+            monkeypatch.setenv('MOLECULE_PROXMOX_SNAPSHOT', 'false')
+            molecule('destroy', '--scenario-name', scenario)
+            molecule('reset', '--scenario-name', scenario)
 
 
 def test_template_not_found():
