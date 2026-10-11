@@ -28,3 +28,6 @@ export TEST_PROXMOX_UNMANAGED_ADDRESS=
 export TEST_PROXMOX_UNMANAGED_SSH_USER=
 export TEST_PROXMOX_UNMANAGED_SSH_PORT=
 export TEST_PROXMOX_UNMANAGED_SSH_IDENTITY_FILE=
+# Optional: A second node for the multiple node test. The node must have
+# a local copy of the template. The test is skipped when not set.
+export TEST_PROXMOX_NODE2=

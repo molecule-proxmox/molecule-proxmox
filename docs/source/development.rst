@@ -72,5 +72,6 @@ The fake Proxmox server implements only the part of the Proxmox API used
 by the driver, so the tests should still be run with a real Proxmox
 cluster before a release.
 
-The unmanaged instance test is skipped with a real Proxmox cluster, unless
-``TEST_PROXMOX_UNMANAGED_ADDRESS`` is set in the ``.envrc`` file.
+The multiple node test and the unmanaged instance test are skipped with a
+real Proxmox cluster, unless ``TEST_PROXMOX_NODE2`` and
+``TEST_PROXMOX_UNMANAGED_ADDRESS`` are set in the ``.envrc`` file.

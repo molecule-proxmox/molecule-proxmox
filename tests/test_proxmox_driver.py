@@ -39,6 +39,45 @@ def test_molecule_test(scenario):
         molecule('reset')
 
 
+def proxmox_api():
+    """Connect to the Proxmox API with the test settings."""
+    import proxmoxer
+    port = os.environ.get('TEST_PROXMOX_PORT')
+    validate_certs = os.environ.get('TEST_PROXMOX_VALIDATE_CERTS', 'true')
+    return proxmoxer.ProxmoxAPI(
+        os.environ['TEST_PROXMOX_HOST'],
+        port=int(port) if port else None,
+        user=os.environ['TEST_PROXMOX_USER'],
+        password=os.environ['TEST_PROXMOX_PASSWORD'],
+        verify_ssl=validate_certs.lower() in ('true', 'yes', '1'))
+
+
+@pytest.mark.skipif(not os.environ.get('TEST_PROXMOX_NODE2'),
+                    reason='TEST_PROXMOX_NODE2 is not set')
+def test_multi_node(tmp_path, monkeypatch):
+    print('')
+    scenario = 'multi-node'
+    testdir = pathlib.Path(__file__).resolve().parent
+    projectdir = testdir / 'proxmox_driver'
+    # Use a known ephemeral directory to read the instance config.
+    monkeypatch.setenv('MOLECULE_EPHEMERAL_DIRECTORY', str(tmp_path))
+    with chdir(projectdir):
+        try:
+            molecule('create', '--scenario-name', scenario)
+            vmids = instance_vmids(tmp_path)
+            vms = proxmox_api().cluster.resources.get(type='vm')
+            nodes = {vm['vmid']: vm['node'] for vm in vms}
+            node = os.environ['TEST_PROXMOX_NODE']
+            node2 = os.environ['TEST_PROXMOX_NODE2']
+            assert nodes[vmids['m01']] == node
+            assert nodes[vmids['m02']] == node2
+            assert nodes[vmids['m03']] == node2
+            molecule('converge', '--scenario-name', scenario)
+        finally:
+            molecule('destroy', '--scenario-name', scenario)
+            molecule('reset', '--scenario-name', scenario)
+
+
 @pytest.mark.skipif(not os.environ.get('TEST_PROXMOX_UNMANAGED_ADDRESS'),
                     reason='TEST_PROXMOX_UNMANAGED_ADDRESS is not set')
 def test_unmanaged():

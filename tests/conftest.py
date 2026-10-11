@@ -91,6 +91,7 @@ def pytest_configure(config):
         'TEST_PROXMOX_PASSWORD': 'fake',
         'TEST_PROXMOX_VALIDATE_CERTS': 'false',
         'TEST_PROXMOX_NODE': fake_proxmox.NODES[0],
+        'TEST_PROXMOX_NODE2': fake_proxmox.NODES[1],
         'TEST_PROXMOX_TEMPLATE_NAME': fake_proxmox.TEMPLATE_NAME,
         'TEST_PROXMOX_TEMPLATE_VMID':
             str(fake_proxmox.TEMPLATE_VMIDS[fake_proxmox.NODES[0]]),

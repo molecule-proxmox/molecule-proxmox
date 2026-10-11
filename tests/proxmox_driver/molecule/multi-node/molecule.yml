@@ -1,0 +1,34 @@
+---
+dependency:
+  name: galaxy
+
+driver:
+  name: molecule-proxmox
+  options:
+    api_host: "${TEST_PROXMOX_HOST}"
+    api_port: ${TEST_PROXMOX_PORT}
+    api_user: "${TEST_PROXMOX_USER}"
+    api_password: "${TEST_PROXMOX_PASSWORD}"
+    validate_certs: "${TEST_PROXMOX_VALIDATE_CERTS:-true}"
+    node: "${TEST_PROXMOX_NODE}"
+    ssh_user: "${TEST_PROXMOX_SSH_USER}"
+    ssh_identity_file: "${TEST_PROXMOX_SSH_IDENTITY_FILE}"
+    # Each node has a local copy of a template with this name.
+    template_name: "${TEST_PROXMOX_TEMPLATE_NAME}"
+    full: "${TEST_PROXMOX_FULL_CLONE:-true}"
+    debug: "${TEST_PROXMOX_DEBUG}"
+
+platforms:
+  # Created on the default node.
+  - name: m01
+
+  # Created on the second node.
+  - name: m02
+    proxmox_node: "${TEST_PROXMOX_NODE2}"
+
+  # Created on the second node, with the alternate keyword.
+  - name: m03
+    node: "${TEST_PROXMOX_NODE2}"
+
+provisioner:
+  name: ansible
